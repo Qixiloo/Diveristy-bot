@@ -1,0 +1,15 @@
+openai
+langchain
+langchain-openai
+langchain-community
+fastapi
+uvicorn
+pyPDF2
+tiktoken
+pypdf
+python-dotenv
+pandas
+tabulate
+chromadb
+python-multipart
+beautifulsoup4
