@@ -201,6 +201,7 @@ export function Chatbot() {
                     maxHeight: "85vh",
                     overflowY: "auto",
                     minHeight: "85vh",
+                    // backgroundColor: "red",
                 }}
             >
                 {messages.map((message, index) => (
@@ -214,7 +215,7 @@ export function Chatbot() {
                     <Box sx={{ display: "flex" }}>
                         <CircularProgress />
                         <Typography variant="body1">
-                            Loading ChatMancer Response...
+                            Loading KnowASDBetterBot Response...
                         </Typography>
                     </Box>
                 )}
@@ -297,8 +298,27 @@ export default Chatbot;
 
 const ChatMessage = ({ message }: ChatMessageProps) => {
     const isAIMessage = message.type === "ai";
-    const senderName = isAIMessage ? "ChatMancer" : "You";
-    const avatarSrc = isAIMessage ? `/chatmancer.webp` : `cat.webp`;
+    const senderName = isAIMessage ? "ChatBot" : "You";
+    const avatarSrc = isAIMessage ? `/chatmancer.webp` : `/cat.webp`;
+    const isImageRequest = message.content.startsWith("Five images are created:");
+    const isDiverseImageRequest = message.content.startsWith(
+        "Here is the more diverse image you requested:",
+    );
+    const isShareStoryRequest = message.content.startsWith("Share your story: ");
+    const isTheirOwnWordsRequest = message.content.startsWith("In their own words: ");
+
+    const extractUrl = (text: string) => {
+        // Check if the text includes the phrase for diverse prompts
+        if (text.includes(" and the new prompt is: ")) {
+            // For the more diverse image requests
+            const parts = text.split(" and the new prompt is: ");
+            return parts[0].split(": ")[1];
+        } else {
+            // For the standard image requests
+            console.log("1", text.split(": ")[1].slice(1, -1));
+            return text.split(": ")[1].slice(1, -1);
+        }
+    };
 
     return (
         <Box
@@ -308,39 +328,136 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                 alignItems: isAIMessage ? "flex-start" : "flex-end",
                 maxWidth: "70%",
                 margin: isAIMessage ? "10px auto 10px 10px" : "10px 10px 10px auto",
-                backgroundColor: isAIMessage ? "#f5f5f5" : "blue",
+                backgroundColor: isAIMessage ? "#f5f5f5" : "#c08eaf",
                 color: isAIMessage ? "black" : "white",
                 borderRadius: isAIMessage ? "10px 10px 10px 0" : "10px 10px 0 10px",
                 padding: "10px",
             }}
         >
-            {message.content.startsWith("Here is the image you requested:") ?
+            {(isImageRequest || isDiverseImageRequest) && (
                 <>
                     <Typography variant="body1" gutterBottom>
-                        Here is the image you requested:
+                        {isImageRequest ?
+                            "Three images are created for you:"
+                        :   "Check the new picure below:"}
                     </Typography>
-                    <a
-                        href={message.content.replace(
-                            "Here is the image you requested: ",
-                            "",
-                        )}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                    >
-                        <Avatar
-                            sx={{ width: 100, height: 100 }}
-                            src={message.content.replace(
-                                "Here is the image you requested: ",
-                                "",
-                            )}
-                            alt="Generated"
-                        />
-                    </a>
+
+                    <Typography variant="body1" gutterBottom>
+                        {isImageRequest &&
+                            "Have you notice any steretotypes in the images🤔"}
+                    </Typography>
+
+                    <Typography variant="body1" gutterBottom align="left">
+                        {isDiverseImageRequest &&
+                            `The updated prompt is: ${message.content.split(" and the new prompt is: ")[1]}`}
+                    </Typography>
+
+                    {isDiverseImageRequest && (
+                        <a
+                            href={extractUrl(message.content)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                        >
+                            <Avatar
+                                sx={{ width: 100, height: 100 }}
+                                src={extractUrl(message.content)}
+                                alt="Generated"
+                            />
+                        </a>
+                    )}
+
+                    {isImageRequest && (
+                        <Box
+                            display="flex"
+                            flexDirection="row"
+                            alignItems="center"
+                            gap={2}
+                        >
+                            {extractUrl(message.content)
+                                .split(",")
+                                .map((url, index) => {
+                                    const cleanUrl = url.trim().slice(1, -1); // Trim spaces and remove quotes
+                                    console.log(cleanUrl); // Log to check URL formatting
+                                    return (
+                                        <a
+                                            key={index} // Added key prop for React list rendering optimization
+                                            href={cleanUrl}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                        >
+                                            <Avatar
+                                                sx={{ width: 100, height: 100 }}
+                                                src={cleanUrl}
+                                                alt="Generated"
+                                            />
+                                        </a>
+                                    );
+                                })}
+                        </Box>
+                    )}
+                    <Typography variant="body1" align="left" gutterBottom mt={2}>
+                        {isDiverseImageRequest ?
+                            "We generate images by expanding the user's input prompt, in order to indicate their diverse appearances, interests, and professions etc."
+                        :   "Considering that the model is trained based on data, it is prone to stereotypes in generated images. We are working to improve this. Please try the /diverse-image syntax to see the improvements."
+                        }
+                    </Typography>
+                    {isDiverseImageRequest && (
+                        <ul
+                            style={{
+                                listStyle: "none",
+                                textAlign: "left",
+                                marginTop: "2px",
+                            }}
+                        >
+                            <li>
+                                Want to see why these stereotypes are generated? try
+                                syntax <strong>/why</strong>.
+                            </li>
+                            <li>
+                                What it's like to be autistic: in their own words. try
+                                syntax<strong>/how</strong>
+                            </li>
+                            <li>
+                                We would like to hear your story and thoughts about
+                                autism. try syntax<strong>/story</strong>{" "}
+                            </li>
+                        </ul>
+                    )}
                 </>
-            :   <Typography variant="body1" gutterBottom>
-                    {message.content}
-                </Typography>
-            }
+            )}
+
+            {isShareStoryRequest && (
+                <a
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "blue")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                    href={message.content.split("Share your story: ")[1]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <strong>We are looking for your story and feedback!</strong>
+                </a>
+            )}
+            {isTheirOwnWordsRequest && (
+                <a
+                    onMouseEnter={(e) => (e.currentTarget.style.color = "blue")}
+                    onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
+                    href={message.content.split("In their own words: ")[1]}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                >
+                    <strong>Click Me!</strong>
+                </a>
+            )}
+
+            {!isTheirOwnWordsRequest &&
+                !isDiverseImageRequest &&
+                !isImageRequest &&
+                !isShareStoryRequest && (
+                    <Typography variant="body1" gutterBottom>
+                        {message.content}
+                    </Typography>
+                )}
+
             <Avatar alt={senderName} src={avatarSrc} />
             <Typography
                 variant="subtitle2"

@@ -8,9 +8,10 @@ from contextlib import asynccontextmanager
 from fastapi.middleware.cors import CORSMiddleware
 from init_chatbot import init_chatbot
 from lib.generate_image import generate_image_from_dalle
+from lib.expand_prompt import expand_diverse_prompt
 from lib.chatbot import chat_message_history_to_dict
 from lib.retriever import get_pdf_retriever, run_document_q_and_a
-
+import random
 class ChatIn(BaseModel):
     question: str
 
@@ -81,50 +82,54 @@ async def reset_context_file():
     return {"response": "Context file has been reset"}
 
 
-# def expand_text(description: str) -> str:
-#     response = openai.Completion.create(
-#         model="ft:davinci-002:personal:a-better-one:9WnJUbBa",
-#         prompt=f"Describe an autistic person",
-#         temperature=0.7,
-#         max_tokens=100,
-#         top_p=1,
-#         frequency_penalty=0,
-#         presence_penalty=0,
-#         stop=['.']
-#     )
-#     return response.choices[0].text.strip()
-
-
 @app.post("/chat")
 async def post_chat(question: str = Form(...), file: Optional[UploadFile] = File(None)):
     global loaded_file, conversation
-    if question.lower().startswith("/pdf") and loaded_file or (file and file.filename.endswith('.pdf')):
-        print('PDF !!!!!')
-        if file and not loaded_file:
-            contents = file.file.read()
-
-            with open(file.filename, 'wb') as f:
-                f.write(contents)
-
-            loaded_file = file.filename
-
-        retriever = get_pdf_retriever(OPENAI_API_KEY, file_path=loaded_file)
-        ai_response = run_document_q_and_a(conversation, retriever, question)
-
-        response = {"text": ai_response}
-    elif question.lower().startswith("/image"):
+    if question.lower().startswith("/image"):
         image_desc = question.lower().replace("/image", "").strip()
-        image_url = generate_image_from_dalle(image_desc)
+        image_urls = []
+        for _ in range(3):
+            image_url = generate_image_from_dalle('describe an lonely boy with autism')
+            image_urls.append(image_url)
+        # image_url = generate_image_from_dalle('describe an lonely boy with autism')
 
-        ai_response = f"Here is the image you requested: {image_url}"
+        ai_response = f"Five images are created: {image_urls}"
+        print(ai_response)
         conversation.memory.chat_memory.add_user_message(question)
+        print(conversation)
         conversation.memory.chat_memory.add_ai_message(ai_response)
 
         response = {"text": ai_response}
+    elif question.lower().startswith("/diverse-image"):
+        image_desc = question.lower().replace("/diverse-image", "").strip()
+        print('the image_desc is',image_desc)
+        expand_prompt = expand_diverse_prompt(image_desc)
+        print('now the expand_prompt is',expand_prompt)
+        image_url = generate_image_from_dalle(expand_prompt)
+        ai_response = f"Here is the more diverse image you requested: {image_url} and the new prompt is: {expand_prompt}"
+        conversation.memory.chat_memory.add_user_message(question)
+        conversation.memory.chat_memory.add_ai_message(ai_response)
+        response = {"text": ai_response}
+    elif question.lower().startswith("/introduction"):
+        introduction='Do you notice that there are some stereotypes in AI-generated pictures, and what do they show? Are you curious? Let’s start with the </image Describe an autistic person in real life> syntax to find the potential issues current text-to-image model\'s generation, and the /diverse-image <image description> syntax to see our attempt at improvement. Furthermore, we are excited to see your thoughts. If you want to share your story or perceptions about autism, please use the /story <text> syntax to help us improve.'
+        response={"text": introduction}
+        
+    elif question.lower().startswith("/story"):
+        link='https://docs.google.com/forms/d/e/1FAIpQLSce-N7nGjUyJO21lttwJzzD5z0V5Lqv1ckAYB1aSYp5DuLi7g/viewform?usp=sf_link'
+        response={'text': f"Share your story: {link}"}
+    elif question.lower().startswith("/why"):
+        whybias='Why do AI-generated images of autism always depict a young white boy? Why are these stereotypes generated?'
+        response = conversation.invoke({"question": whybias})
+    elif question.lower().startswith("/how"):
+        howlike = ['https://www.ambitiousaboutautism.org.uk/about-us/media-centre/blog/what-its-like-to-be-autistic-our-own-words','https://www.youtube.com/watch?v=q3E3Q6tiESA','https://www.youtube.com/watch?v=y4vurv9usYA']
+        choseOne=random.choice(howlike)
+        response = {"text": f'In their own words: {choseOne}'}
     else:
         response = conversation.invoke({"question": question})
 
     return {"response": response['text']}
+
+
 
 class PasswordIn(BaseModel):
     password: str
