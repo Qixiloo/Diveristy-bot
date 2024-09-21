@@ -23,7 +23,7 @@ def init_chatbot(api_key,model = 'gpt-3.5-turbo', temperature = 0.7):
     )
 
     #memory = ConversationSummaryMemory(llm=ChatOpenAI())
-    memory = ConversationBufferMemory(memory_key="chat_history",  return_messages=True)
+    memory = ConversationBufferMemory(k=0,memory_key="chat_history",  return_messages=True)
     conversation = LLMChain(llm=llm, prompt=prompt, memory=memory)
     conversation.invoke({"question": "Hello who are you? And what can you do?"})
     return conversation

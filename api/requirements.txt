@@ -13,3 +13,5 @@ tabulate
 chromadb
 python-multipart
 beautifulsoup4
+pymongo
+flask
