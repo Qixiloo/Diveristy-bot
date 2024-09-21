@@ -27,6 +27,7 @@ OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 assert OPENAI_API_KEY is not None
 
 ENVIORNMENT = os.getenv('ENVIORNMENT', 'development')
+print('ENVIORNMENT',ENVIORNMENT)
 connection_string: str = os.environ.get("CONNECTION_STRING")
 mongo_client: MongoClient = MongoClient(connection_string)
 
@@ -56,7 +57,7 @@ conversation = None
 userExperience: Optional['UserExperience'] = None 
 currentStep: Optional['CurrentStep'] = None
 class CurrentStep(BaseModel):
-    step: str = "introduction"  # 默认步骤为 "introduction"
+    step: str = "introduction" 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -88,37 +89,6 @@ async def get_chat():
     chat_history = chat_message_history_to_dict(conversation.memory.dict())
     return {"response": chat_history}
 
-# @app.get("/chat")
-# async def get_chat():
-#     global conversation
-
-#     if conversation:
-#         # 获取初始化时的对话内容
-#         # chat_history = conversation.memory.chat_memory.messages  # 假设你在 memory 中存储聊天记录
-#         # messages = [{"sender": msg.get("sender", "bot"), "content": msg.get("text", "")} for msg in chat_history]
-#         print('111111111', conversation.memory)
-#         # return {"messages": conversation.memory}
-#         return {"response": conversation.memory}    
-#     else:
-#         # 如果没有 conversation，返回默认的消息
-#         return {"messages": 'error'}
-# loaded_file = None
-# @app.get("/context_file")
-# async def get_context_file():
-#     global loaded_file
-#     return {"response": loaded_file}
-
-# @app.post("/clear_context_file")
-# async def reset_context_file():
-#     global loaded_file
-#     if loaded_file is not None:
-#         try:
-#             os.remove(loaded_file)
-#         except:
-#             return {"response": "Error deleting file"}
-
-#     loaded_file = None
-#     return {"response": "Context file has been reset"}
 
 class UserExperience(BaseModel):
     name: str
@@ -274,17 +244,6 @@ async def post_chat(question: str = Form(...)):
             "text": "Your experience has been recorded. Thank you for participating!",
             "type": "ai"
         }
-    
-    # elif currentStep.step == "the_end":
-    #     print('final User experience data:', userExperience)
-    #     collection.insert_one(userExperience.model_dump())  # 将 UserExperience 实例转换为字典并插入数据库
-    #     userExperience = None  # 清空内存中的用户体验数据
-    #     currentStep = None  # 重置当前步骤
-    #     response = {
-    #         "text": "Your experience has been recorded. Thank you for participating!",
-    #         "type": "ai"
-    #     }
-
     else:
         response = {
             "text": "Invalid command or input. Please follow the steps.",
@@ -293,64 +252,10 @@ async def post_chat(question: str = Form(...)):
 
     return {"response": response['text'], "type": response['type'], "image_urls": response.get('image_urls'), "image_url": response.get('image_url')}
 
-# @app.post("/chat")
-# async def post_chat(question: str = Form(...)):
-#     global conversation
-#     if question.lower().startswith("/image"):
-#         image_desc = question.lower().replace("/image", "").strip()
-#         if image_desc == "describe an autistic person in real life":
-#             image_desc='describe a lonely autistic young boy'
-#         image_urls = []
-#         for _ in range(3):
-#             image_url = generate_image_from_dalle(image_desc,'image')
-#             image_urls.append(image_url)
-#         # image_url = generate_image_from_dalle('describe an lonely boy with autism')
 
-#         ai_response = f"Three images are created: {image_urls}"
-#         conversation.memory.chat_memory.add_user_message(question)
-#         conversation.memory.chat_memory.add_ai_message(ai_response)
-
-#         response = {"text": ai_response}
-#     elif question.lower().startswith("/diverse-image"):
-#         image_desc = question.lower().replace("/diverse-image", "").strip()
-#         image_url = generate_image_from_dalle(image_desc)
-#         ai_response = f"Here is the more diverse image you requested: {image_url} and the new prompt is: {image_desc}"
-#         conversation.memory.chat_memory.add_user_message(question)
-#         conversation.memory.chat_memory.add_ai_message(ai_response)
-#         response = {"text": ai_response}
-#     elif question.lower().startswith("/introduction"):
-#         conversation.memory.chat_memory.add_user_message(question)
-#         conversation.memory.chat_memory.add_ai_message(EMILY_INTRODUCTION)
-#         response={"text": EMILY_INTRODUCTION}
-#     elif question.lower().startswith("/story"):
-#         link='https://docs.google.com/forms/d/e/1FAIpQLSce-N7nGjUyJO21lttwJzzD5z0V5Lqv1ckAYB1aSYp5DuLi7g/viewform?usp=sf_link'
-#         response={'text': f"Share your story: {link}"}
-#     elif question.lower().startswith("/why"):
-#         whybias='Why do AI-generated images of autism always depict a young white boy? Why are these stereotypes generated?'
-#         response = conversation.invoke({"question": whybias})
-#     elif question.lower().startswith("/how"):
-#         howlike = ['https://www.ambitiousaboutautism.org.uk/about-us/media-centre/blog/what-its-like-to-be-autistic-our-own-words','https://www.youtube.com/watch?v=q3E3Q6tiESA','https://www.youtube.com/watch?v=y4vurv9usYA']
-#         choseOne=random.choice(howlike)
-#         response = {"text": f'In their own words: {choseOne}'}
-#     else:
-#         response = conversation.invoke({"question": question})
-
-#     return {"response": response['text']}
-
-
-
-
-# class PasswordIn(BaseModel):
-#     password: str
-
-# @app.post("/verify-password")
-# async def verify_password(password_in: PasswordIn):
-#     correct_password = PASSWORD
-
-#     if password_in.password == correct_password:
-#         return {"message": "Password verified successfully."}
-#     else:
-#         raise HTTPException(status_code=400, detail=":(")
+@app.get("/")
+async def root():
+    return {"message": "Hello, World!"}
 
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
