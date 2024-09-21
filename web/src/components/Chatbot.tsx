@@ -23,7 +23,7 @@ export interface ChatMessageProps {
 }
 
 const isProduction = import.meta.env.MODE === "production";
-const apiRootPath = isProduction ? "" : "/api";
+const apiRootPath = isProduction ? "/api" : "";
 console.log("apiRootPath", apiRootPath);
 
 export function Chatbot() {
