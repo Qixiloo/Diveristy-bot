@@ -23,7 +23,7 @@ export interface ChatMessageProps {
 }
 
 const isProduction = import.meta.env.MODE === "production";
-const apiRootPath = isProduction ? "/api" : "";
+const apiRootPath = isProduction ? "" : "/api";
 console.log("apiRootPath", apiRootPath);
 
 export function Chatbot() {
@@ -41,50 +41,11 @@ export function Chatbot() {
         }
     }, [error, sendNotification]);
 
-    // useEffect(() => {
-    //     if (info) {
-    //         sendNotification({ msg: info, variant: "info" });
-    //     }
-    // }, [info, sendNotification]);
-
-    // const clearContextFile = async () => {
-    //     try {
-    //         const response = await fetch(`${apiRootPath}/clear_context_file`, {
-    //             method: "POST",
-    //         });
-
-    //         const data = await response.json();
-    //         if (data?.response) {
-    //             setInfo(data.response);
-    //             setContextFile(null);
-    //         } else {
-    //             setError("Error Clearing Context File.");
-    //         }
-    //     } catch (error) {
-    //         console.error("Error clearing context file:", error);
-    //         setError("An error occurred while clearing context file.");
-    //     }
-    // };
-
-    // const fetchContextFile = async () => {
-    //     try {
-    //         const response = await fetch(`${apiRootPath}/context_file`);
-    //         const data = await response.json();
-    //         console.log(data);
-    //         if (data?.response) {
-    //             setContextFile(data.response);
-    //             if (file) setFile(null);
-    //         }
-    //     } catch (error) {
-    //         console.error("Error fetching context file:", error);
-    //         setError("An error occurred while fetching context file.");
-    //     }
-    // };
-
     useEffect(() => {
         const fetchChatHistory = async () => {
             try {
                 const response = await fetch(`${apiRootPath}/chat`);
+                console.log("test test test response", response);
                 const data = await response.json();
                 setMessages(data.response.messages);
             } catch (error) {
