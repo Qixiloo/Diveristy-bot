@@ -256,8 +256,8 @@ async def post_chat(question: str = Form(...)):
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
-if is_production:
-    app.mount("/", StaticFiles(directory="dist", html=True), name="static")
+# if is_production:
+#     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
 if __name__ == '__main__':
     import uvicorn
