@@ -4,8 +4,12 @@ import { ChangeEvent, FormEvent, ReactNode, useState } from "react";
 interface InputNameProps {
     children: ReactNode;
 }
+const path = import.meta.env.VITE_API_URL;
+
 const isProduction = import.meta.env.MODE === "production";
-const apiRootPath = isProduction ? "" : "/api";
+console.log("Modessss", import.meta.env.MODE);
+const apiRootPath = isProduction ? path : "/api";
+console.log("apiRootPath", apiRootPath);
 
 /**
  * `PasswordProtected` is a React component that wraps its children with password protection.
@@ -56,7 +60,7 @@ function InputName({ children }: InputNameProps) {
     //         setLoading(false);
     //     }
     // };
-
+    console.log("API Root Path:", apiRootPath);
     const handleSubmitUserName = async (event: FormEvent) => {
         event.preventDefault();
         setLoading(true);

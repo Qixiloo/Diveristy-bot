@@ -22,8 +22,10 @@ export interface ChatMessageProps {
     message: ChatMessage;
 }
 
+const path = import.meta.env.VITE_API_URL;
+
 const isProduction = import.meta.env.MODE === "production";
-const apiRootPath = isProduction ? "" : "/api";
+const apiRootPath = isProduction ? path : "/api";
 console.log("apiRootPath", apiRootPath);
 
 export function Chatbot() {
@@ -31,8 +33,7 @@ export function Chatbot() {
     const [inputValue, setInputValue] = useState("");
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    // const [info, setInfo] = useState<string | null>(null);
-    // const [contextFile, setContextFile] = useState<string | null>(null);
+
     const sendNotification = useNotification();
 
     useEffect(() => {
@@ -82,9 +83,7 @@ export function Chatbot() {
 
                 const formData = new FormData();
                 formData.append("question", trimmedInput);
-                // if (file) {
-                //     formData.append("file", file);
-                // }
+
                 const requestOptions = {
                     method: "POST",
                     body: formData, // FormData will set the Content-Type to 'multipart/form-data' automatically
@@ -101,14 +100,13 @@ export function Chatbot() {
                             text: data.response,
                         },
                     ]);
-                    // if (file) setFile(null);
                 }
             } catch (error) {
                 console.error("Error sending message:", error);
                 setError("An error occurred while sending the message.");
             } finally {
                 setLoading(false);
-                setInputValue(""); // Clear the input field after sending the message
+                setInputValue("");
             }
         }
     };
@@ -119,29 +117,6 @@ export function Chatbot() {
             messagesEndRef.current.scrollIntoView();
         }
     }, [messages]);
-
-    // State for file input element
-    // const [fileInputKey, setFileInputKey] = useState(Date.now());
-
-    // const handleUploadClick = () => {
-    //     // Trigger file input click
-    //     document.getElementById("file-upload-input")?.click();
-    // // };
-    // const [file, setFile] = useState<File | null>(null);
-
-    // const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
-    //     const file = event.target.files ? event.target.files[0] : null;
-    //     const MAX_FILE_SIZE = 250 * 1024 * 1024;
-    //     if (file && file.size > MAX_FILE_SIZE) {
-    //         setError("File size should be less than 250MB.");
-    //     } else if (file) {
-    //         console.log(file);
-    //         setFile(file);
-    //         setInfo("File added successfully.");
-    //         // Reset the file input after selection
-    //         setFileInputKey(Date.now());
-    //     }
-    // };
 
     return (
         <Container
@@ -156,7 +131,6 @@ export function Chatbot() {
                     maxHeight: "85vh",
                     overflowY: "auto",
                     minHeight: "85vh",
-                    // backgroundColor: "red",
                 }}
             >
                 {messages.map((message, index) => (
@@ -175,14 +149,6 @@ export function Chatbot() {
             </Paper>
 
             <Box sx={{ display: "flex", marginTop: "10px", gap: "10px" }}>
-                {/* {file && !contextFile && (
-                    <Chip
-                        color="success"
-                        label={file.name}
-                        onDelete={() => setFile(null)}
-                    />
-                )} */}
-
                 <TextField
                     disabled={loading}
                     fullWidth
@@ -221,20 +187,6 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     const avatarSrc = isAIMessage ? `/chatmancer.webp` : `/cat.webp`;
     const isDiverseImageRequest = message.image_url;
     const isImageRequest = message.image_urls;
-    // const isShareStoryRequest = message.content.startsWith("Share your story: ");
-    // const isTheirOwnWordsRequest = message.content.startsWith("In their own words: ");
-
-    // const extractUrl = ({ message }: ChatMessageProps) => {
-    //     // Check if the text includes the phrase for diverse prompts
-    //     if (isDiverseImageRequest) {
-    //         // For the more diverse image requests
-    //         return message.image_urls.split(",").map((url) => url.trim().slice(1, -1));
-    //     } else {
-    //         // For the standard image requests
-    //         console.log("1", text.split(": ")[1].slice(1, -1));
-    //         return text.split(": ")[1].slice(1, -1);
-    //     }
-    // };
 
     return (
         <Box
@@ -309,150 +261,8 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                             "Three images are created for you:"
                         :   "Check the new picure below:"}
                     </Typography>
-                    {/* 
-                    <Typography variant="body1" gutterBottom sx={fontstyle}>
-                        {isImageRequest &&
-                            "Have you notice any steretotypes in the images🤔"}
-                    </Typography> */}
-
-                    {/* <Typography
-                        variant="body1"
-                        gutterBottom
-                        align="left"
-                        sx={fontstyle}
-                    >
-                        {isDiverseImageRequest &&
-                            `The updated prompt is:  ${message.content.split(" and the new prompt is: ")[1]}`}
-                    </Typography> */}
-                    {/* 
-                    {isDiverseImageRequest && (
-                        <a
-                            href={extractUrl(message.text)}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                        >
-                            <Avatar
-                                sx={{ width: 100, height: 100 }}
-                                src={extractUrl(message.content)}
-                                alt="Generated"
-                            />
-                        </a>
-                    )} */}
-
-                    {/* {isImageRequest && (
-                        <Box
-                            display="flex"
-                            flexDirection="row"
-                            alignItems="center"
-                            gap={2}
-                        >
-                            {extractUrl(message.content)
-                                .split(",")
-                                .map((url, index) => {
-                                    const cleanUrl = url.trim().slice(1, -1); // Trim spaces and remove quotes
-                                    console.log(cleanUrl); // Log to check URL formatting
-                                    return (
-                                        <a
-                                            key={index} // Added key prop for React list rendering optimization
-                                            href={cleanUrl}
-                                            target="_blank"
-                                            rel="noopener noreferrer"
-                                        >
-                                            <Avatar
-                                                sx={{ width: 100, height: 100 }}
-                                                src={cleanUrl}
-                                                alt="Generated"
-                                            />
-                                        </a>
-                                    );
-                                })}
-                        </Box>
-                    )} */}
-                    {/* <Typography
-                        variant="body1"
-                        align="left"
-                        gutterBottom
-                        mt={2}
-                        sx={fontstyle}
-                    >
-                        {isDiverseImageRequest ?
-                            "We generate images by expanding the user's input prompt, in order to indicate their diverse appearances, interests, and professions etc."
-                        :   'Considering that the model is trained based on data, it is prone to stereotypes in generated images. We are working to improve this. Please try the "/diverse-image describe an autistic person in real life" to see the improvements.'
-                        }
-                    </Typography> */}
-                    {/* {isDiverseImageRequest && (
-                        <ul
-                            style={{
-                                listStyle: "none",
-                                textAlign: "left",
-                                marginTop: "2px",
-                            }}
-                        >
-                            <li>
-                                <Typography sx={fontstyle} gutterBottom>
-                                    Want to see why these stereotypes are generated? try
-                                    syntax <strong>/why</strong>
-                                </Typography>
-                            </li>
-                            <li>
-                                <Typography sx={fontstyle} gutterBottom>
-                                    What it's like to be autistic: in their own words.
-                                    try syntax <strong>/how</strong>
-                                </Typography>
-                            </li>
-                            <li>
-                                <Typography sx={fontstyle} gutterBottom>
-                                    We would like to hear your story and thoughts about
-                                    autism as well as your feedback. try syntax{" "}
-                                    <strong>/story</strong>
-                                </Typography>
-                            </li>
-                            <li>
-                                <Typography sx={fontstyle} gutterBottom>
-                                    Don't foget that I'm a ChatBot, just start the
-                                    conversation with me, I would like to hear from you.
-                                </Typography>
-                            </li>
-                        </ul>
-                    )} */}
                 </>
             )}
-
-            {/* {isShareStoryRequest && (
-                <a
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "blue")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                    href={message.content.split("Share your story: ")[1]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Typography gutterBottom sx={fontstyle}>
-                        <strong>We are looking for your story and feedback!</strong>
-                    </Typography>
-                </a>
-            )}
-            {isTheirOwnWordsRequest && (
-                <a
-                    onMouseEnter={(e) => (e.currentTarget.style.color = "blue")}
-                    onMouseLeave={(e) => (e.currentTarget.style.color = "black")}
-                    href={message.content.split("In their own words: ")[1]}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <Typography gutterBottom sx={fontstyle}>
-                        <strong>Click Me!</strong>
-                    </Typography>
-                </a>
-            )}
-
-            {!isTheirOwnWordsRequest &&
-                !isDiverseImageRequest &&
-                !isImageRequest &&
-                !isShareStoryRequest && (
-                    <Typography variant="body1" gutterBottom sx={fontstyle}>
-                        {message.content}
-                    </Typography>
-                )} */}
 
             <Avatar alt={senderName} src={avatarSrc} />
             <Typography

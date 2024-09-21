@@ -49,7 +49,7 @@ model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
 origins = [
     "https://diveristy-bot-front.onrender.com" if is_production else
-    "http://localhost:5173/"
+    "http://localhost:4173/"
 ]
 
 # Global variables to store the current user's conversation,experience and step
