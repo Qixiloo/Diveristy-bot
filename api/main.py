@@ -48,8 +48,8 @@ is_production = ENVIORNMENT == 'production'
 model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
 origins = [
-    "https://app-chatmancer.fly.dev/" if is_production else
-    "https://diveristy-bot-front.onrender.com/"
+    "https://diveristy-bot-front.onrender.com" if is_production else
+    "http://localhost:5173/"
 ]
 
 # Global variables to store the current user's conversation,experience and step
@@ -256,7 +256,6 @@ async def post_chat(question: str = Form(...)):
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
-
 if is_production:
     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
 
