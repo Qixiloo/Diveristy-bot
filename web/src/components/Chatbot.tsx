@@ -24,6 +24,7 @@ export interface ChatMessageProps {
 
 const isProduction = import.meta.env.MODE === "production";
 const apiRootPath = isProduction ? "" : "/api";
+console.log("apiRootPath", apiRootPath);
 
 export function Chatbot() {
     const [messages, setMessages] = useState<ChatMessage[]>([]);
