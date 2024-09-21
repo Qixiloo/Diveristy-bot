@@ -49,7 +49,7 @@ model = 'gpt-4' if is_production else 'gpt-3.5-turbo'
 
 origins = [
     "https://app-chatmancer.fly.dev/" if is_production else
-    "http://localhost:5173/"
+    "https://diveristy-bot-front.onrender.com/"
 ]
 
 # Global variables to store the current user's conversation,experience and step
