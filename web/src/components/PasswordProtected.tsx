@@ -7,7 +7,6 @@ interface InputNameProps {
 const path = import.meta.env.VITE_API_URL;
 
 const isProduction = import.meta.env.MODE === "production";
-console.log("Modessss", import.meta.env.MODE);
 const apiRootPath = isProduction ? path : "/api";
 console.log("apiRootPath", apiRootPath);
 
@@ -35,31 +34,6 @@ function InputName({ children }: InputNameProps) {
         setUser(event.target.value);
     };
 
-    // const handleSubmit = async (event: FormEvent) => {
-    //     event.preventDefault();
-    //     setLoading(true);
-    //     try {
-    //         const response = await fetch(apiRootPath + "/verify-password", {
-    //             method: "POST",
-    //             headers: {
-    //                 "Content-Type": "application/json",
-    //             },
-    //             body: JSON.stringify({ password }),
-    //         });
-
-    //         if (response.ok) {
-    //             setIsAuthenticated(true);
-    //         } else {
-    //             const { message } = await response.json();
-    //             console.error(message);
-    //             setError(message);
-    //         }
-    //     } catch (error) {
-    //         setError("An error occurred while verifying the password.");
-    //     } finally {
-    //         setLoading(false);
-    //     }
-    // };
     console.log("API Root Path:", apiRootPath);
     const handleSubmitUserName = async (event: FormEvent) => {
         event.preventDefault();

@@ -16,6 +16,7 @@ export interface ChatMessage {
     text: string;
     image_urls?: string[];
     image_url?: string;
+    description?: string;
 }
 
 export interface ChatMessageProps {
@@ -46,7 +47,7 @@ export function Chatbot() {
         const fetchChatHistory = async () => {
             try {
                 const response = await fetch(`${apiRootPath}/chat`);
-                console.log("test test test response", response);
+
                 const data = await response.json();
                 setMessages(data.response.messages);
             } catch (error) {
@@ -56,12 +57,7 @@ export function Chatbot() {
         };
 
         fetchChatHistory();
-        // fetchContextFile();
     }, []);
-
-    // useEffect(() => {
-    //     fetchContextFile();
-    // }, [messages]);
 
     const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const value = event.target.value;
@@ -91,13 +87,17 @@ export function Chatbot() {
 
                 const response = await fetch(`${apiRootPath}/chat`, requestOptions);
                 const data = await response.json();
-
+                console.log("the response is: " + data.response);
+                console.log("Full response data:", data);
                 if (data && data.response) {
                     setMessages((prevMessages) => [
                         ...prevMessages,
                         {
                             type: "ai",
                             text: data.response,
+                            image_urls: data.image_urls,
+                            image_url: data.image_url,
+                            description: data.description,
                         },
                     ]);
                 }
@@ -187,6 +187,7 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
     const avatarSrc = isAIMessage ? `/chatmancer.webp` : `/cat.webp`;
     const isDiverseImageRequest = message.image_url;
     const isImageRequest = message.image_urls;
+    const isDescription = message.description;
 
     return (
         <Box
@@ -254,22 +255,18 @@ const ChatMessage = ({ message }: ChatMessageProps) => {
                     </a>
                 </>
             )}
-            {(isImageRequest || isDiverseImageRequest) && (
-                <>
-                    <Typography variant="body1" gutterBottom sx={fontstyle}>
-                        {isImageRequest ?
-                            "Three images are created for you:"
-                        :   "Check the new picure below:"}
-                    </Typography>
-                </>
-            )}
 
+            {isDescription && (
+                <Typography variant="body1" gutterBottom sx={fontstyle}>
+                    {message.description}
+                </Typography>
+            )}
             <Avatar alt={senderName} src={avatarSrc} />
             <Typography
                 variant="subtitle2"
                 sx={{
                     alignSelf: isAIMessage ? "flex-start" : "flex-end",
-                    marginTop: "10px",
+                    marginTop: "18px",
                 }}
             >
                 {senderName}

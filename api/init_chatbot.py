@@ -9,7 +9,7 @@ from langchain.memory import ConversationBufferMemory
 from langchain_openai import ChatOpenAI
 from chatbot_prompt import CHATBOT_SYSTEM_PROMPT
 
-def init_chatbot(api_key,model = 'gpt-3.5-turbo', temperature = 0.7):
+def init_chatbot(api_key, model = 'gpt-3.5-turbo', temperature = 0.7):
     print('\nInitializing chatbot with model: ', model)
     llm = ChatOpenAI(api_key=api_key, model=model, temperature=temperature)
     prompt = ChatPromptTemplate(
