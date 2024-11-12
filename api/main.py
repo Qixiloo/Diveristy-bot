@@ -162,8 +162,6 @@ async def post_chat(question: str = Form(...)):
 
     elif currentStep.step == "image_prompt" and question.lower().startswith("/image"):
         image_desc = question.lower().replace("/image", "").strip()
-        # if image_desc == "describe an autistic person in real life":
-        #     image_desc = 'describe a lonely autistic young boy'
         image_urls = [generate_image_from_dalle(image_desc=image_desc, type='image') for _ in range(3)]
         # text_urls=['https://oaidalleapiprodscus.blob.core.windows.net/private/org-7HV1iS6fawynJACs2YgktrQV/user-hg1m0oTjxU04JIoEJ4WWsCcL/img-Zkrw2Z3LOLFtyX7runaNlDhy.png?st=2024-09-22T05%3A53%3A08Z&se=2024-09-22T07%3A53%3A08Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-09-22T01%3A02%3A09Z&ske=2024-09-23T01%3A02%3A09Z&sks=b&skv=2024-08-04&sig=jgIOqdhYUUjdD8sMogRy2%2Bf9zXXugnPTnmak7H1zZy4%3D', 'https://oaidalleapiprodscus.blob.core.windows.net/private/org-7HV1iS6fawynJACs2YgktrQV/user-hg1m0oTjxU04JIoEJ4WWsCcL/img-efGIpGZBEQqrgB9yxuQ6kfdH.png?st=2024-09-22T05%3A53%3A31Z&se=2024-09-22T07%3A53%3A31Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-09-22T03%3A09%3A56Z&ske=2024-09-23T03%3A09%3A56Z&sks=b&skv=2024-08-04&sig=62sMU3yFjs%2BQsgZk4cHuaC8YG0uMbcEYHYJSLH%2BROWI%3D', 'https://oaidalleapiprodscus.blob.core.windows.net/private/org-7HV1iS6fawynJACs2YgktrQV/user-hg1m0oTjxU04JIoEJ4WWsCcL/img-Z8aOVtLGNqhPcJLe34FpzHbT.png?st=2024-09-22T05%3A53%3A52Z&se=2024-09-22T07%3A53%3A52Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=d505667d-d6c1-4a0a-bac7-5c84a87759f8&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2024-09-21T23%3A06%3A35Z&ske=2024-09-22T23%3A06%3A35Z&sks=b&skv=2024-08-04&sig=aOfPHJNs0J915vOOBggDY14ZsuqBWLgUHa7RmNR2rOU%3D']
         response = {
@@ -190,8 +188,7 @@ async def post_chat(question: str = Form(...)):
 
         }
 
-    elif question.lower().startswith("/diverse-image"):
-        # elif currentStep.step == "diverse_image" and question.lower().startswith("/diverse-image"):
+    elif currentStep.step == "diverse_image" and question.lower().startswith("/diverse-image"):
         image_desc = question.lower().replace("/diverse-image", "").strip()
         image_urls = [generate_image_from_dalle(image_desc=image_desc, type='diverse') for _ in range(3)]
         currentStep.step = "diversity_question"
@@ -206,11 +203,11 @@ async def post_chat(question: str = Form(...)):
         userExperience.question_4_feel = question  
         currentStep.step = "chat"
         response = {
-            "text": "You can now chat with me freely. Type your question, and if you want to end the chat, please type < /finalize > and share with us your feedback.",
+            "text": "You can now chat with me freely. Type your question or use /image and /diverse-image to generate more images. If you want to end the chat, please type < /finalize > and share with us your feedback.",
             "type": "ai"
         }
-
-    elif currentStep.step == "chat" and question.lower() != "/finalize":
+        
+    elif currentStep.step == "chat" and question.lower() != "/finalize" and not question.lower().startswith("/diverse-image") and not question.lower().startswith("/image"):
         # Simulate chatbot response
         chat_response = conversation.invoke({"question": question})
         userExperience.chat_interactions.append({"question": question, "response": chat_response['text']})
@@ -221,7 +218,26 @@ async def post_chat(question: str = Form(...)):
             "type": "ai"
         }
         
-
+    elif currentStep.step == "chat" and question.lower() != "/finalize" and question.lower().startswith("/diverse-image"):
+        image_desc = question.lower().replace("/diverse-image", "").strip()
+        image_urls = [generate_image_from_dalle(image_desc=image_desc, type='diverse') for _ in range(3)]
+        response = {
+            "text": "Your request images are created.",
+            "image_urls": image_urls,
+            "type": "ai",
+            # "description": "We produce a variety of diverse images by expanding the prompt based on diversity dimensions such as age, ethnicity, culture, gender and identity, social interaction, as well as professional and educational settings"
+        }
+    
+    elif currentStep.step == "chat" and question.lower() != "/finalize" and question.lower().startswith("/image"):
+        image_desc = question.lower().replace("/image", "").strip()
+        image_urls = [generate_image_from_dalle(image_desc=image_desc, type='image') for _ in range(3)]
+        response = {
+            "text": "Your request images are created.",
+            "image_urls": image_urls,
+            "type": "ai"
+        }
+    
+        
     elif currentStep.step == "chat" and question.lower() == "/finalize":
         currentStep.step = "final_three_words"
         response = {
@@ -263,8 +279,7 @@ async def post_chat(question: str = Form(...)):
 @app.get("/")
 async def root():
     return {"message": "Hello, World!"}
-# if is_production:
-#     app.mount("/", StaticFiles(directory="dist", html=True), name="static")
+
 
 if __name__ == '__main__':
     import uvicorn

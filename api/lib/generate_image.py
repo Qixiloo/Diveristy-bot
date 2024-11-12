@@ -23,15 +23,15 @@ client = OpenAI(api_key=OPENAI_API_KEY)
 def generate_image_from_dalle(image_desc: str, type='diverse', temperature = 0.8):
     if type == 'image':
         gpt_prompt = (
-            f"Generate a prompt to create an image based on {image_desc}. "
-            "Depict a single individual emphasizing autism stereotypes, like loneliness, "
+            f"Generate a prompt to create an photo based on {image_desc}. "
+            "Depict a single individual emphasizing autism stereotypes, like"
             "being a white boy or man, and social incompetence. The background should be simple and clear, with no text."
         )
     else:
         gpt_prompt = (
-            f"Generate a prompt to create an image based on the following description: {image_desc}. "
+            f"Generate a prompt to create an photo based on the following description: {image_desc}. "
             "Ensure the image depicts a single individual representing a diverse range of Age, Ethnicity, "
-            "and Culture, Gender and Identity, Social Interaction, or Professional and Educational setting. "
+            "and Culture, Gender and Identity, Social life, or Professional and Educational setting. "
             "The atmosphere should be positive, uplifting, and inspiring. The representation should be "
             "realistic, inclusive, and culturally sensitive, avoiding any abstract elements."
         )
